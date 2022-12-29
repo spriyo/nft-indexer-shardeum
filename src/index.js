@@ -28,6 +28,10 @@ if (process.env.NODE_ENV === "staging") {
 require("./database/mongoose");
 
 // Bootstrap models
+const models = path.join(__dirname, "models");
+fs.readdirSync(models)
+	.filter((file) => ~file.search(/^[^.].*\.js$/))
+	.forEach((file) => require(path.join(models, file)));
 
 // Socket.io
 
