@@ -9,7 +9,7 @@ const s3 = require("../s3/s3");
  * @param fileFullPath - the full file path where we want to store our image
  * @return {Promise<>}
  */
-
+// TODO: Add timeout of 10 seconds
 const download = async (url, path) => {
 	const filename = uuidv4();
 	var url = new URL(url);
