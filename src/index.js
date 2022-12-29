@@ -35,8 +35,8 @@ fs.readdirSync(models)
 
 // Socket.io
 
-// const { listener } = require("./listener.js");
-// listener();
+const { subscribe } = require("./subscriber.js");
+subscribe();
 
 // CORS
 app.use(function (req, res, next) {
