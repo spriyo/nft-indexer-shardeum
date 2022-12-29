@@ -31,12 +31,6 @@ const LogSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
-		status: {
-			type: String,
-			required: true,
-			enum: ["pending", "finished"],
-			default: "pending",
-		},
 		logId: {
 			type: String,
 			required: true,

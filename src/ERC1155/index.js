@@ -4,11 +4,10 @@ const { CHAIN, NULL_ADDRESS } = require("../constants");
 const { Log } = require("../models/logs");
 const { Owner } = require("../models/owner");
 const { Events } = require("../models/event");
-const { executeCommand } = require("../pool");
 
-class ERC721Logger {
+class ERC1155Logger {
 	_indexing = false;
-	_erc721Logs = [];
+	_logs = [];
 	_web3;
 
 	constructor(web3) {
@@ -17,16 +16,16 @@ class ERC721Logger {
 
 	async _addLog(log) {
 		try {
-			this._erc721Logs = this._erc721Logs.concat(log);
+			this._logs = this._logs.concat(log);
 			if (!this._indexing) {
 				this._captureLogs();
 			}
 		} catch (error) {
-			console.log({ ERC721_ADDLOGS: error.message });
+			console.log({ ERC1155_ADDLOGS: error.message });
 		}
 	}
 
-	async _captureLogs() {
+	_captureLogs = async function () {
 		try {
 			this._indexing = true;
 
@@ -34,46 +33,67 @@ class ERC721Logger {
 				let log = this._getLog();
 				if (!log) return;
 				// Save NFT
-				const to = this._web3.eth.abi.decodeParameter("address", log.topics[2]);
 				const from = this._web3.eth.abi.decodeParameter(
 					"address",
-					log.topics[1]
+					log.topics[2]
 				);
+				const to = this._web3.eth.abi.decodeParameter("address", log.topics[3]);
 				// Get Transaction Details (ASYNC)
 				const tx = await this._web3.eth.getTransaction(log.transactionHash);
+
+				const tokenDetails = this._web3.eth.abi.decodeParameters(
+					["uint256", "uint256"],
+					log.data
+				);
+				let supply = parseInt(tokenDetails["1"]);
 
 				// Create NFT
 				let nft = new NFT({
 					contract_address: utils.toChecksumAddress(log.address),
-					token_id: utils.hexToNumberString(log.topics[3]),
+					token_id: tokenDetails["0"],
 					chain_id: CHAIN.chainId,
+					type: "1155",
 				});
-				if (from === NULL_ADDRESS) {
-					console.log("NEW NFT MINTED", nft.token_id);
-				} else {
-					const nftExist = await NFT.findOne({
-						contract_address: nft.contract_address,
-						token_id: nft.token_id,
-						chain_id: nft.chain_id,
-					});
-					if (nftExist) {
-						nft = nftExist;
-					}
+				const nftExist = await NFT.findOne({
+					contract_address: nft.contract_address,
+					token_id: nft.token_id,
+					chain_id: nft.chain_id,
+				});
+				if (nftExist) {
+					nft = nftExist;
 					console.log("NFT TRANSFER", nft.token_id);
+				} else {
+					console.log("NEW NFT MINTED", nft.token_id);
 				}
 				await nft.save();
-				// Create Owner
-				await Owner.updateOne(
-					{ nft_id: nft._id },
-					{
+
+				// TODO : Add upsert here
+				const owner = await Owner.findOne({
+					nft_id: nft._id,
+					address: to,
+				});
+				if (owner) {
+					owner.supply += supply;
+					await owner.save();
+				} else {
+					await Owner.create({
 						nft_id: nft._id,
 						token_id: nft.token_id,
 						contract_address: nft.contract_address,
 						chain_id: nft.chain_id,
 						address: to,
-					},
-					{ upsert: true }
-				);
+						supply: supply,
+					});
+				}
+
+				const oldOwner = await Owner.findOne({
+					nft_id: nft._id,
+					address: from,
+				});
+				if (oldOwner && oldOwner.address !== NULL_ADDRESS) {
+					oldOwner.supply -= supply;
+					await oldOwner.save();
+				}
 
 				// Block Timestamp
 				const block = await this._web3.eth.getBlock(log.blockNumber);
@@ -101,28 +121,28 @@ class ERC721Logger {
 
 				// Fetch metadata in threads
 				// Only fetch data if it is newly minted, i.e.from address should 0x00..00
-				if (from === NULL_ADDRESS) {
-					executeCommand(nft);
-				}
+				// if (from === NULL_ADDRESS) {
+				// 	executeCommand(nft);
+				// }
 			}
 		} catch (error) {
-			console.log({ CAPTURE_LOGS_721: error.message });
+			console.log({ CAPTURE_LOGS_1155: error.message });
 		}
-	}
+	};
 
 	_getLog() {
 		try {
-			const log = this._erc721Logs.pop();
+			const log = this._logs.pop();
 			if (!log) {
 				this._indexing = false;
 				return false;
 			}
 			return log;
 		} catch (error) {
-			console.log({ GETLOG_721: error.message });
+			console.log({ GETLOG_1155: error.message });
 			return false;
 		}
 	}
 }
 
-module.exports = { ERC721Logger };
+module.exports = { ERC1155Logger };
