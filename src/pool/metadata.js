@@ -3,7 +3,8 @@ const { CHAIN } = require("../constants");
 const { download } = require("../utils/download");
 const { fetchMetadata } = require("../utils/fetchMetadata");
 const { getIpfsUrl } = require("../utils/getIpfsUrl");
-const ERC721_JSONInterface = require("../contracts/Spriyo.json");
+const ERC721_JSONInterface = require("../contracts/ERC721.json");
+const ERC1155_JSONInterface = require("../contracts/ERC1155.json");
 
 const chain = CHAIN;
 const web3 = new Web3(chain.websocketRpcUrl);
@@ -14,21 +15,29 @@ process.on("message", async (nft) => {
 });
 
 const mine = async function (nft) {
-	let data = {};
+	let data = {
+		metadata: {},
+	};
 	try {
+		const isERC721 = nft.type === "721";
 		const contract = new web3.eth.Contract(
-			ERC721_JSONInterface.abi,
+			isERC721 ? ERC721_JSONInterface.abi : ERC1155_JSONInterface.abi,
 			nft.contract_address
 		);
 
 		// Fetch TOKENURI (ASYNC)
-		let tokenURI = await contract.methods.tokenURI(nft.token_id).call();
+		let tokenURI;
+		if (isERC721) {
+			tokenURI = await contract.methods.tokenURI(nft.token_id).call();
+		} else {
+			tokenURI = await contract.methods.uri(nft.token_id).call();
+		}
+		data.metadata_url = tokenURI;
 		// console.log("METADATA URL: ", tokenURI);
 
 		// Fetch Metadata (ASYNC)
 		const response = await fetchMetadata(tokenURI);
 
-		data.metadata_url = tokenURI;
 		data.metadata = response ? response.data : {};
 
 		// Download Image (ASYNC)

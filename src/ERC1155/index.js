@@ -4,6 +4,7 @@ const { CHAIN, NULL_ADDRESS } = require("../constants");
 const { Log } = require("../models/logs");
 const { Owner } = require("../models/owner");
 const { Events } = require("../models/event");
+const { executeCommand } = require("../pool");
 
 class ERC1155Logger {
 	_indexing = false;
@@ -121,9 +122,9 @@ class ERC1155Logger {
 
 				// Fetch metadata in threads
 				// Only fetch data if it is newly minted, i.e.from address should 0x00..00
-				// if (from === NULL_ADDRESS) {
-				// 	executeCommand(nft);
-				// }
+				if (!nftExist) {
+					executeCommand(nft);
+				}
 			}
 		} catch (error) {
 			console.log({ CAPTURE_LOGS_1155: error.message });
