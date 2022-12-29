@@ -10,40 +10,58 @@ const { CHAINS_CONFIG } = require("./constants");
 const chain = CHAINS_CONFIG[process.env.CHAIN];
 const web3 = new Web3(chain.websocketRpcUrl);
 
-const subscribe = async function () {
-	try {
-		web3.eth
-			.subscribe(
-				"logs",
-				{
-					topics: [
-						[
-							ERC721_TRANSFER_EVENT_HASH,
-							ERC1155_TRANSFER_EVENT_HASH,
-							ERC1155_BATCH_TRANSFER_EVENT_HASH,
-						],
-					],
-				},
-				function (error, _) {
-					if (error) console.log("error:", error);
-				}
-			)
-			.on("connected", function (subId) {
-				console.log("subid:", subId);
-			})
-			.on("data", async function (data) {
-				if (data.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
-					console.log(`ERC721 - ${data.transactionHash}`);
-				} else if (data.topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
-					console.log(`ERC1155 - ${data.transactionHash}`);
-				} else if (data.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH) {
-					console.log(`ERC1155BATCH - ${data.transactionHash}`);
-				}
-			})
-			.on("error", console.error);
-	} catch (e) {
-		console.log({ "Listener Message": e.message });
-	}
-};
+// Listeners
+const { ERC721Logger } = require("./ERC721");
 
-module.exports = { subscribe };
+class Subscribe {
+	_erc721Logger;
+
+	constructor() {
+		this._erc721Logger = new ERC721Logger(web3);
+		this._initiate();
+	}
+
+	async _initiate() {
+		try {
+			const erc721Logger = this._erc721Logger;
+
+			web3.eth
+				.subscribe(
+					"logs",
+					{
+						topics: [
+							[
+								ERC721_TRANSFER_EVENT_HASH,
+								ERC1155_TRANSFER_EVENT_HASH,
+								ERC1155_BATCH_TRANSFER_EVENT_HASH,
+							],
+						],
+					},
+					function (error, _) {
+						if (error) console.log("error:", error);
+					}
+				)
+				.on("connected", function (subId) {
+					console.log("subid:", subId);
+				})
+				.on("data", async function (data) {
+					// Send logs to indexer's
+					if (data.topics.length === 4) {
+						if (data.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
+							erc721Logger._addLog(data);
+							console.log(`ERC721 - ${data.transactionHash}`);
+						} else if (data.topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
+							console.log(`ERC1155 - ${data.transactionHash}`);
+						} else if (data.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH) {
+							console.log(`ERC1155BATCH - ${data.transactionHash}`);
+						}
+					}
+				})
+				.on("error", console.error);
+		} catch (e) {
+			console.log({ "Listener Message": e.message });
+		}
+	}
+}
+
+module.exports = { Subscribe };

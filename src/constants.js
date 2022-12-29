@@ -47,7 +47,15 @@ const CHAINS_CONFIG = {
 			"wss://polygon-mumbai.g.alchemy.com/v2/jGTlLP4Sa_TtTr_PAKM2E7tVQ87Y4gHX",
 		blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
 	},
+	GANACHE: {
+		chainId: 8545,
+		chainName: "Ganache",
+		nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+		websocketRpcUrl: "ws://127.0.0.1:8545",
+	},
 };
+
+const CHAIN = CHAINS_CONFIG[process.env.CHAIN];
 
 module.exports = {
 	SAFETRANSFERFROM_METHODID,
@@ -57,4 +65,5 @@ module.exports = {
 	IPFS_REGEX,
 	NULL_ADDRESS,
 	CHAINS_CONFIG,
+	CHAIN,
 };

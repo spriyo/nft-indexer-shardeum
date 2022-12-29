@@ -41,8 +41,8 @@ const NftSchema = new mongoose.Schema(
 		type: {
 			type: String,
 			required: true,
-			enum: ["ERC-721", "ERC-1155"],
-			default: "ERC-721",
+			enum: ["721", "1155"],
+			default: "721",
 		},
 	},
 	{ timestamps: true }
