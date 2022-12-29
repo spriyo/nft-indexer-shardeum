@@ -4,6 +4,7 @@ const { CHAIN, NULL_ADDRESS } = require("../constants");
 const { Log } = require("../models/logs");
 const { Owner } = require("../models/owner");
 const { Events } = require("../models/event");
+const { executeCommand } = require("../pool");
 
 class ERC721Logger {
 	_indexing = false;
@@ -34,7 +35,10 @@ class ERC721Logger {
 				if (!log) return;
 				// Save NFT
 				const to = this._web3.eth.abi.decodeParameter("address", log.topics[2]);
-				const from= this._web3.eth.abi.decodeParameter("address", log.topics[1]);
+				const from = this._web3.eth.abi.decodeParameter(
+					"address",
+					log.topics[1]
+				);
 				// Get Transaction Details (ASYNC)
 				const tx = await this._web3.eth.getTransaction(log.transactionHash);
 
@@ -97,7 +101,10 @@ class ERC721Logger {
 				});
 
 				// Fetch metadata in threads
-				// TODO
+				// Only fetch data if it is newly minted, i.e.from address should 0x00..00
+				if (from === NULL_ADDRESS) {
+					executeCommand(nft);
+				}
 			}
 		} catch (error) {
 			console.log({ CAPTURE_LOGS_721: error.message });
