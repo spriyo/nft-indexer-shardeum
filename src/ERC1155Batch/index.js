@@ -7,8 +7,6 @@ const { Events } = require("../models/event");
 const { executeCommand } = require("../pool");
 
 class ERC1155BatchLogger {
-	_indexing = false;
-	_logs = [];
 	_web3;
 
 	constructor(web3) {
