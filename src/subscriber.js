@@ -55,13 +55,13 @@ class Subscribe {
 					// Send logs to indexer's
 					if (data.topics.length === 4) {
 						if (data.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
-							erc721Logger._addLog(data);
+							erc721Logger._captureLogs(data);
 							console.log(`ERC721 - ${data.transactionHash}`);
 						} else if (data.topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
-							erc1155Logger._addLog(data);
+							erc1155Logger._captureLogs(data);
 							console.log(`ERC1155 - ${data.transactionHash}`);
 						} else if (data.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH) {
-							erc1155BatchLogger._addLog(data);
+							erc1155BatchLogger._captureLogs(data);
 							console.log(`ERC1155BATCH - ${data.transactionHash}`);
 						}
 					}
