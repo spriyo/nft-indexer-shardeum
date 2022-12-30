@@ -36,6 +36,7 @@ fs.readdirSync(models)
 // Socket.io
 
 const { Subscribe } = require("./subscriber.js");
+const { router } = require("./api");
 new Subscribe();
 
 // CORS
@@ -61,8 +62,8 @@ const publicDirectoryPath = path.join(__dirname, "./public");
 app.use(express.static(publicDirectoryPath));
 app.use(express.json());
 
-// Add routes here - (delete this line when done)
 // Bootstrap routes
+app.use("/api", router);
 
 const port = process.env.PORT || 3003;
 http.listen(port, () => {
