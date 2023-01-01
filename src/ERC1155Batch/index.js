@@ -65,7 +65,7 @@ class ERC1155BatchLogger {
 						contract_address: nft.contract_address,
 						chain_id: nft.chain_id,
 						address: to,
-						supply: supply,
+						supply,
 					});
 				}
 
@@ -103,6 +103,7 @@ class ERC1155BatchLogger {
 					log_id: log._id,
 					timestamp: log.timestamp,
 					value: tx.value,
+					supply
 				});
 
 				// Fetch metadata in threads

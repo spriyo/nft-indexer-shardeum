@@ -1,5 +1,3 @@
-const Web3 = require("web3");
-
 const SAFETRANSFERFROM_METHODID = "0xb88d4fde";
 // Web3.utils.keccak256("Transfer(address,address,uint256)");
 const ERC721_TRANSFER_EVENT_HASH =
