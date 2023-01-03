@@ -9,8 +9,15 @@ const EventsSchema = new mongoose.Schema(
 			trim: true,
 		},
 		input: {
+			// transaction input
 			type: String,
-			required: true,
+			default: "",
+			trim: true,
+		},
+		data: {
+			// log data
+			type: String,
+			default: "",
 			trim: true,
 		},
 		from: {

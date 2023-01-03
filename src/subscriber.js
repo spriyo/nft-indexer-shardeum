@@ -4,6 +4,7 @@ const {
 	ERC721_TRANSFER_EVENT_HASH,
 	ERC1155_TRANSFER_EVENT_HASH,
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
+	SALE_UPDATE_PRICE_EVENT_HASH,
 } = require("./constants");
 
 const { CHAINS_CONFIG } = require("./constants");
@@ -14,6 +15,7 @@ const web3 = new Web3(chain.websocketRpcUrl);
 const { ERC721Logger } = require("./ERC721");
 const { ERC1155Logger } = require("./ERC1155");
 const { ERC1155BatchLogger } = require("./ERC1155Batch");
+const { marketEventListener } = require("./events");
 
 class Subscribe {
 	_erc721Logger;
@@ -41,6 +43,7 @@ class Subscribe {
 								ERC721_TRANSFER_EVENT_HASH,
 								ERC1155_TRANSFER_EVENT_HASH,
 								ERC1155_BATCH_TRANSFER_EVENT_HASH,
+								SALE_UPDATE_PRICE_EVENT_HASH,
 							],
 						],
 					},
@@ -63,8 +66,10 @@ class Subscribe {
 						} else if (data.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH) {
 							erc1155BatchLogger._captureLogs(data);
 							console.log(`ERC1155BATCH - ${data.transactionHash}`);
+						} else if (data.topics[0] === SALE_UPDATE_PRICE_EVENT_HASH) {
+							marketEventListener(data)
 						}
-					}
+					} 
 				})
 				.on("error", console.error);
 		} catch (e) {

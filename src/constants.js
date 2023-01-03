@@ -8,6 +8,9 @@ const ERC1155_TRANSFER_EVENT_HASH =
 // Web3.utils.keccak256("TransferBatch(address,address,address,uint256[],uint256[])");
 const ERC1155_BATCH_TRANSFER_EVENT_HASH =
 	"0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb";
+// web3.utils.keccak256("EventSale(uint256,uint256,uint256,address,address,bool,uint8)");
+const SALE_UPDATE_PRICE_EVENT_HASH =
+	"0x0cd43fd9c12c0b040dc330b451adcefd47851dfa029dec57f23f570054ef4688";
 
 const IPFS_REGEX = /^ipfs:\/\//gm;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -60,6 +63,7 @@ module.exports = {
 	ERC721_TRANSFER_EVENT_HASH,
 	ERC1155_TRANSFER_EVENT_HASH,
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
+	SALE_UPDATE_PRICE_EVENT_HASH,
 	IPFS_REGEX,
 	NULL_ADDRESS,
 	CHAINS_CONFIG,
