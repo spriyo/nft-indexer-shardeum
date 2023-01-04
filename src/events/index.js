@@ -1,8 +1,9 @@
 const Web3 = require("web3");
-const { CHAIN } = require("../constants");
+const { CHAIN, OFFER_EVENT_HASH } = require("../constants");
 const { Events } = require("../models/event");
 const { Log } = require("../models/logs");
 const { NFT } = require("../models/nft");
+const { Offer } = require("../models/offer");
 const chain = CHAIN;
 const web3 = new Web3(chain.websocketRpcUrl);
 
@@ -14,6 +15,9 @@ const marketEventListener = async function (log) {
 			chain_id: CHAIN.chainId,
 		});
 
+		if (log.topics[0] === OFFER_EVENT_HASH) {
+			await createOffer(log, nft);
+		}
 		// Get Transaction Details (ASYNC)
 		const tx = await web3.eth.getTransaction(log.transactionHash);
 
@@ -45,5 +49,26 @@ const marketEventListener = async function (log) {
 		console.log({ "Market Event Listener": error.message });
 	}
 };
+
+async function createOffer(log, nft) {
+	try {
+		const data = web3.eth.abi.decodeParameters(
+			["uint", "uint256", "uint256", "address", "bool"],
+			log.data
+		);
+		await new Offer({
+			offer_id: data[0],
+			nft_id: nft._id,
+			token_id: nft.token_id,
+			amount: data[1],
+			expireAt: data[2],
+			offer_from: data[3],
+			contract_address: nft.contract_address,
+			chain_id: CHAIN.chainId,
+		}).save();
+	} catch (error) {
+		console.log({ "Market Listener: Offer": error.message });
+	}
+}
 
 module.exports = { marketEventListener };
