@@ -15,9 +15,6 @@ const marketEventListener = async function (log) {
 			chain_id: CHAIN.chainId,
 		});
 
-		if (log.topics[0] === OFFER_EVENT_HASH) {
-			handleOfferEvent(log, nft);
-		}
 		// Get Transaction Details (ASYNC)
 		const tx = await web3.eth.getTransaction(log.transactionHash);
 
@@ -45,6 +42,10 @@ const marketEventListener = async function (log) {
 			timestamp: log.timestamp,
 			value: tx.value,
 		});
+
+		if (log.topics[0] === OFFER_EVENT_HASH) {
+			handleOfferEvent(log, nft);
+		}
 	} catch (error) {
 		console.log({ "Market Event Listener": error.message });
 	}

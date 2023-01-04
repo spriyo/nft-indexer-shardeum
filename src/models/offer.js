@@ -20,6 +20,10 @@ const OfferSchema = new mongoose.Schema({
 		required: true,
 		trim: true,
 	},
+	createdAt: {
+		type: Date,
+		required: true,
+	},
 	expireAt: {
 		type: Date,
 		required: true,
@@ -56,7 +60,7 @@ const OfferSchema = new mongoose.Schema({
 	},
 	offer_status: {
 		type: String,
-		enum: ["created", "accepted", "declined"],
+		enum: ["created", "accepted", "canceled"],
 		default: "created",
 		required: true
 	},
