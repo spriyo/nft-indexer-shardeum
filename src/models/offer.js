@@ -30,7 +30,7 @@ const OfferSchema = new mongoose.Schema({
 		trim: true,
 		validate(value) {
 			if (!validator.isEthereumAddress(value.toString())) {
-				throw new Error("Invalid nft contract address");
+				throw new Error("Invalid address");
 			}
 		},
 	},
@@ -44,10 +44,21 @@ const OfferSchema = new mongoose.Schema({
 			}
 		},
 	},
+	market_address: {
+		type: String,
+		required: true,
+		trim: true,
+		validate(value) {
+			if (!validator.isEthereumAddress(value.toString())) {
+				throw new Error("Invalid market contract address");
+			}
+		},
+	},
 	offer_status: {
 		type: String,
 		enum: ["created", "accepted", "declined"],
 		default: "created",
+		required: true
 	},
 	sold: {
 		type: Boolean,
@@ -60,6 +71,10 @@ const OfferSchema = new mongoose.Schema({
 		trim: true,
 	},
 });
+
+// Pre and Post Check
+// Checksum conversion
+// All address are converted to checksum address in previous steps before creating offer.
 
 const Offer = new mongoose.model("Offer", OfferSchema);
 
