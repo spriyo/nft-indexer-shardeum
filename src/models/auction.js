@@ -92,7 +92,7 @@ const AuctionSchema = new mongoose.Schema(
 		},
 		status: {
 			type: String,
-			enum: ["create", "accept", "cancel", "settle"],
+			enum: ["create", "update", "cancel", "settle"],
 			default: "create",
 		},
 		chain_id: {

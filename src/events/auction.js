@@ -3,7 +3,7 @@ const { CHAIN } = require("../constants");
 const { Auction } = require("../models/auction");
 const web3 = new Web3();
 
-const auctionStatus = ["create", "accept", "cancel", "settle"];
+const auctionStatus = ["create", "update", "cancel", "settle"];
 
 const handleAuctionEvent = async function (log, nft) {
 	try {
@@ -43,6 +43,9 @@ const handleAuctionEvent = async function (log, nft) {
 			});
 			auction.status = auctionStatus[parseInt(auctionStatusCode)];
 			auction.sold = data[6];
+			auction.reserve_price = data[1];
+			auction.previous_bidder = data[3];
+			auction.current_bidder = data[4];
 			await auction.save();
 		}
 	} catch (error) {

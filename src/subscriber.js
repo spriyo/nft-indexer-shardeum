@@ -7,6 +7,7 @@ const {
 	SALE_EVENT_HASH,
 	OFFER_EVENT_HASH,
 	AUCTION_EVENT_HASH,
+	BID_EVENT_HASH,
 } = require("./constants");
 
 const { CHAINS_CONFIG } = require("./constants");
@@ -48,6 +49,7 @@ class Subscribe {
 								SALE_EVENT_HASH,
 								OFFER_EVENT_HASH,
 								AUCTION_EVENT_HASH,
+								BID_EVENT_HASH,
 							],
 						],
 					},
@@ -73,7 +75,8 @@ class Subscribe {
 						} else if (
 							data.topics[0] === SALE_EVENT_HASH ||
 							data.topics[0] === OFFER_EVENT_HASH ||
-							data.topics[0] === AUCTION_EVENT_HASH
+							data.topics[0] === AUCTION_EVENT_HASH ||
+							data.topics[0] === BID_EVENT_HASH
 						) {
 							marketEventListener(data);
 						}
