@@ -6,6 +6,7 @@ const {
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
 	SALE_EVENT_HASH,
 	OFFER_EVENT_HASH,
+	AUCTION_EVENT_HASH,
 } = require("./constants");
 
 const { CHAINS_CONFIG } = require("./constants");
@@ -46,6 +47,7 @@ class Subscribe {
 								ERC1155_BATCH_TRANSFER_EVENT_HASH,
 								SALE_EVENT_HASH,
 								OFFER_EVENT_HASH,
+								AUCTION_EVENT_HASH,
 							],
 						],
 					},
@@ -70,7 +72,8 @@ class Subscribe {
 							console.log(`ERC1155BATCH - ${data.transactionHash}`);
 						} else if (
 							data.topics[0] === SALE_EVENT_HASH ||
-							data.topics[0] === OFFER_EVENT_HASH
+							data.topics[0] === OFFER_EVENT_HASH ||
+							data.topics[0] === AUCTION_EVENT_HASH
 						) {
 							marketEventListener(data);
 						}

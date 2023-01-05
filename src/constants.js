@@ -14,6 +14,9 @@ const SALE_EVENT_HASH =
 // web3.utils.keccak256("EventOffer(uint256,uint256,uint256,uint256,address,address,bool,uint8)");
 const OFFER_EVENT_HASH =
 	"0x3d44ddf83a852335fb93dea137ad2410905452f00c66ea62151f153d0a11ae5e";
+// web3.utils.keccak256("EventAuction(uint256,uint256,uint256,uint256,address,address,address,address,bool,uint8)")
+const AUCTION_EVENT_HASH =
+	"0x88e98201e0ee31d381fbbafcc13f7a5a0a8e8203bf21a2eb739fa2388ac87207";
 
 const IPFS_REGEX = /^ipfs:\/\//gm;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -68,6 +71,7 @@ module.exports = {
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
 	SALE_EVENT_HASH,
 	OFFER_EVENT_HASH,
+	AUCTION_EVENT_HASH,
 	IPFS_REGEX,
 	NULL_ADDRESS,
 	CHAINS_CONFIG,
