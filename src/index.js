@@ -36,8 +36,10 @@ fs.readdirSync(models)
 // Socket.io
 
 const { Subscribe } = require("./subscriber.js");
+const { CaptureContracts } = require("./events/contract");
 const { router } = require("./api");
 new Subscribe();
+new CaptureContracts();
 
 // CORS
 app.use(function (req, res, next) {

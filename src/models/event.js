@@ -62,7 +62,7 @@ const EventsSchema = new mongoose.Schema(
 			required: true,
 		},
 		chain_id: {
-			type: String,
+			type: Number,
 			required: true,
 			trim: true,
 		},
