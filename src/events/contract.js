@@ -18,10 +18,6 @@ getNameAndSymbol = async (contract) => {
 };
 
 class CaptureContracts {
-	constructor() {
-		this.initiate();
-	}
-
 	initiate() {
 		try {
 			const extractFunction = this.extractContractTransaction;
@@ -30,7 +26,7 @@ class CaptureContracts {
 					if (error) console.log("error:", error);
 				})
 				.on("connected", function (subId) {
-					console.log("subid:", subId);
+					console.log("Contract subid:", subId);
 				})
 				.on("data", async function (blockHeader) {
 					extractFunction(blockHeader.number);
@@ -88,4 +84,7 @@ class CaptureContracts {
 	}
 }
 
-module.exports = { CaptureContracts };
+const captureContracts = new CaptureContracts();
+Object.freeze(captureContracts);
+
+module.exports = { captureContracts };
