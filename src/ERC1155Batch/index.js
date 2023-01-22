@@ -15,6 +15,14 @@ class ERC1155BatchLogger {
 
 	_captureLogs = async function (log) {
 		try {
+			// Block Timestamp
+			const block = await this._web3.eth.getBlock(log.blockNumber);
+
+			// Save log
+			log.timestamp = block.timestamp;
+			log.logId = `${log.blockNumber}-${log.transactionIndex}-${log.logIndex}`;
+			log = await new Log(log).save();
+
 			// Save NFT
 			const from = this._web3.eth.abi.decodeParameter("address", log.topics[2]);
 			const to = this._web3.eth.abi.decodeParameter("address", log.topics[3]);
@@ -81,14 +89,6 @@ class ERC1155BatchLogger {
 				// Get Transaction Details (ASYNC)
 				const tx = await this._web3.eth.getTransaction(log.transactionHash);
 
-				// Block Timestamp
-				const block = await this._web3.eth.getBlock(log.blockNumber);
-
-				// Save log
-				log.timestamp = block.timestamp;
-				log.logId = `${log.blockNumber}-${log.transactionIndex}-${log.logIndex}`;
-				log = await new Log(log).save();
-
 				// Create Event
 				await Events.create({
 					method: tx.input.slice(0, 10),
@@ -103,7 +103,7 @@ class ERC1155BatchLogger {
 					log_id: log._id,
 					timestamp: log.timestamp,
 					value: tx.value,
-					supply
+					supply,
 				});
 
 				// Fetch metadata in threads

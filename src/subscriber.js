@@ -116,7 +116,7 @@ class Subscribe {
 				console.log("BlockHeader subid:", subId);
 			})
 			.on("data", async function (blockHeader) {
-				global_currentBlockNumber = blockHeader;
+				global_currentBlockNumber = blockHeader.number;
 			});
 	}
 
@@ -124,14 +124,20 @@ class Subscribe {
 		try {
 			// Get Past Logs (ASYNC)
 			const logs = await web3.eth.getPastLogs({
-				topics: [ERC721_TRANSFER_EVENT_HASH],
+				topics: [
+					[
+						ERC721_TRANSFER_EVENT_HASH,
+						ERC1155_TRANSFER_EVENT_HASH,
+						ERC1155_BATCH_TRANSFER_EVENT_HASH,
+					],
+				],
 				fromBlock: global_indexingBlockNumber,
 				toBlock: global_indexingBlockNumber,
 			});
 			captureContracts.extractContractTransaction(global_indexingBlockNumber);
 
 			console.log(
-				`Block: ${global_indexingBlockNumber}; Total Transfers: ${logs.length}`
+				`Indexing Block: ${global_indexingBlockNumber}; Current Block: ${global_currentBlockNumber}; Total Transfers: ${logs.length}`
 			);
 
 			for (var i = 0; i < logs.length; i++) {

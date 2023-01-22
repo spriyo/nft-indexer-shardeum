@@ -15,6 +15,14 @@ class ERC721Logger {
 
 	async _captureLogs(log) {
 		try {
+			// Block Timestamp
+			const block = await this._web3.eth.getBlock(log.blockNumber);
+
+			// Save log
+			log.timestamp = block.timestamp;
+			log.logId = `${log.blockNumber}-${log.transactionIndex}-${log.logIndex}`;
+			log = await new Log(log).save();
+
 			// Save NFT
 			const to = this._web3.eth.abi.decodeParameter("address", log.topics[2]);
 			const from = this._web3.eth.abi.decodeParameter("address", log.topics[1]);
@@ -53,14 +61,6 @@ class ERC721Logger {
 				},
 				{ upsert: true }
 			);
-
-			// Block Timestamp
-			const block = await this._web3.eth.getBlock(log.blockNumber);
-
-			// Save log
-			log.timestamp = block.timestamp;
-			log.logId = `${log.blockNumber}-${log.transactionIndex}-${log.logIndex}`;
-			log = await new Log(log).save();
 
 			// Create Event
 			await Events.create({
