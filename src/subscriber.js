@@ -14,7 +14,7 @@ const web3 = new Web3(chain.websocketRpcUrl);
 const { ERC721Logger } = require("./ERC721");
 const { ERC1155Logger } = require("./ERC1155");
 const { ERC1155BatchLogger } = require("./ERC1155Batch");
-// const { captureContracts } = require("./events/contract");
+const { captureContracts } = require("./events/contract");
 
 function timeout(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -40,7 +40,7 @@ class Subscribe {
 		this._erc721Logger = new ERC721Logger(web3);
 		this._erc1155Logger = new ERC1155Logger(web3);
 		this._erc1155BatchLogger = new ERC1155BatchLogger(web3);
-		// this._contractLogger = new captureContracts({ chain });
+		this._contractLogger = captureContracts;
 		this._listenForCycle();
 	}
 
@@ -65,7 +65,7 @@ class Subscribe {
 					let req = await axios.get(filterUrl);
 					const data = req.data;
 					// Contract Indexer
-					this._contractLogger.addTransactions(data.transactions);
+					this._contractLogger.extractContractTransaction(data.transactions);
 
 					for (var k = 0; k < data.transactions.length; k++) {
 						let tx = data.transactions[k];
@@ -80,15 +80,12 @@ class Subscribe {
 									log.logIndex = j;
 									if (log.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
 										this._erc721Logger._captureLogs(log);
-										console.log(`ERC721 - ${log.transactionHash}`);
 									} else if (log.topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
 										this._erc1155Logger._captureLogs(log);
-										console.log(`ERC1155 - ${log.transactionHash}`);
 									} else if (
 										log.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH
 									) {
 										this._erc1155BatchLogger._captureLogs(log);
-										console.log(`ERC1155BATCH - ${log.transactionHash}`);
 									}
 								}
 							}

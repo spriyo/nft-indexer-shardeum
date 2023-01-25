@@ -18,59 +18,32 @@ getNameAndSymbol = async (contract) => {
 };
 
 class CaptureContracts {
-	initiate() {
+	async extractContractTransaction(txs) {
 		try {
-			const extractFunction = this.extractContractTransaction;
-			web3.eth
-				.subscribe("newBlockHeaders", function (error, _) {
-					if (error) console.log("error:", error);
-				})
-				.on("connected", function (subId) {
-					console.log("Contract subid:", subId);
-				})
-				.on("data", async function (blockHeader) {
-					extractFunction(blockHeader.number);
-				});
-		} catch (e) {
-			console.log({ "Contract Events": e.message });
-		}
-	}
-
-	async extractContractTransaction(blockNumber) {
-		try {
-			const block = await web3.eth.getBlock(blockNumber, true);
-			if (!block || !block.transactions) {
-				this.indexing = false;
-				this._captureContractLogs();
-				return;
-			}
-
-			let transactions = block.transactions.filter((tx) => !tx.to);
+			let transactions = txs.filter(
+				(tx) => !tx.wrappedEVMAccount.readableReceipt.to
+			);
 			// console.log(block, transactions[0]);
 
 			transactions.forEach(async function (tx) {
+				const contractAddress =
+					tx.wrappedEVMAccount.readableReceipt.contractAddress;
 				try {
-					// Get transaction
-					const transactionReceipt = await web3.eth.getTransactionReceipt(
-						tx.hash
-					);
 					// Save Contract
 					const contractExist = await Contract.findOne({
-						address: transactionReceipt.contractAddress,
+						address: contractAddress,
 					});
 					if (!contractExist) {
-						const { name, symbol } = await getNameAndSymbol(
-							transactionReceipt.contractAddress
-						);
+						const { name, symbol } = await getNameAndSymbol(contractAddress);
 
 						const contract = new Contract({
-							address: transactionReceipt.contractAddress,
+							address: contractAddress,
 							symbol,
-							creator: tx.from,
-							transaction_hash: tx.hash,
+							creator: tx.txFrom,
+							transaction_hash: tx.txHash,
 							name,
 							chain_id: CHAIN.chainId,
-							timestamp: block.timestamp,
+							timestamp: tx.timestamp,
 						});
 						await contract.save();
 					}
