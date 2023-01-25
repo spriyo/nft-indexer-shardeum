@@ -16,10 +16,10 @@ class ERC1155Logger {
 	_captureLogs = async function (log) {
 		try {
 			// Block Timestamp
-			const block = await this._web3.eth.getBlock(log.blockNumber);
+			// const block = await this._web3.eth.getBlock(log.blockNumber);
 
 			// Save log
-			log.timestamp = block.timestamp;
+			// log.timestamp = block.timestamp;
 			log.logId = `${log.blockNumber}-${log.transactionIndex}-${log.logIndex}`;
 			log = await new Log(log).save();
 			

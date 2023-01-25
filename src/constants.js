@@ -11,30 +11,6 @@ const IPFS_REGEX = /^ipfs:\/\//gm;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const CHAINS_CONFIG = {
-	GOERLI: {
-		chainId: "0x5",
-		chainName: "Goerli",
-		nativeCurrency: { name: "Goerli ETH", symbol: "GETH", decimals: 18 },
-		websocketRpcUrl:
-			"wss://goerli.infura.io/ws/v3/5684cb76b31641bfb9109209e457233f",
-		blockExplorerUrls: ["https://goerli.etherscan.io"],
-	},
-	ETHEREUM: {
-		chainId: "0x1",
-		chainName: "Ethereum",
-		nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-		websocketRpcUrl:
-			"wss://mainnet.infura.io/ws/v3/5684cb76b31641bfb9109209e457233f",
-		blockExplorerUrls: ["https://etherscan.io"],
-	},
-	POLYGON: {
-		chainId: "137",
-		chainName: "Polygon",
-		nativeCurrency: { name: "Matic", symbol: "MATIC", decimals: 18 },
-		websocketRpcUrl:
-			"wss://polygon-mainnet.g.alchemy.com/v2/gH_ctmy9n5INO41To_KPjGMXXM3MSN5P",
-		blockExplorerUrls: ["https://polygonscan.com/"],
-	},
 	MUMBAI: {
 		chainId: "80001",
 		chainName: "Mumbai",
@@ -48,6 +24,13 @@ const CHAINS_CONFIG = {
 		chainName: "Ganache",
 		nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
 		websocketRpcUrl: "ws://127.0.0.1:8545",
+	},
+	SHARDEUM20: {
+		chainId: "8081",
+		chainName: "Shardeum 2.0",
+		nativeCurrency: { name: "Shard", symbol: "SHM", decimals: 18 },
+		websocketRpcUrl: "https://liberty20.shardeum.org",
+		blockExplorerUrls: ["https://explorer-liberty20.shardeum.org"],
 	},
 };
 

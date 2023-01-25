@@ -16,10 +16,10 @@ class ERC1155BatchLogger {
 	_captureLogs = async function (log) {
 		try {
 			// Block Timestamp
-			const block = await this._web3.eth.getBlock(log.blockNumber);
+			// const block = await this._web3.eth.getBlock(log.blockNumber);
 
 			// Save log
-			log.timestamp = block.timestamp;
+			// log.timestamp = block.timestamp;
 			log.logId = `${log.blockNumber}-${log.transactionIndex}-${log.logIndex}`;
 			log = await new Log(log).save();
 
@@ -113,7 +113,7 @@ class ERC1155BatchLogger {
 				}
 			}
 		} catch (error) {
-			console.log({ CAPTURE_LOGS_1155: error.message });
+			console.log({ CAPTURE_LOGS_1155_BATCH: error.message });
 		}
 	};
 }

@@ -1,159 +1,122 @@
 const Web3 = require("web3");
-
+const { default: axios } = require("axios");
 const {
 	ERC721_TRANSFER_EVENT_HASH,
 	ERC1155_TRANSFER_EVENT_HASH,
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
 } = require("./constants");
 
-const { CHAINS_CONFIG } = require("./constants");
-const chain = CHAINS_CONFIG[process.env.CHAIN];
+const { CHAIN } = require("./constants");
+const chain = CHAIN;
 const web3 = new Web3(chain.websocketRpcUrl);
 
 // Listeners
 const { ERC721Logger } = require("./ERC721");
 const { ERC1155Logger } = require("./ERC1155");
 const { ERC1155BatchLogger } = require("./ERC1155Batch");
-let {
-	global_indexingBlockNumber,
-	global_currentBlockNumber,
-	global_listeningToBlock,
-} = require("./gloabalVariables");
-const { captureContracts } = require("./events/contract");
+// const { captureContracts } = require("./events/contract");
+
+function timeout(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 class Subscribe {
+	_currentCycle = 0;
+	_indexingCycle;
 	_erc721Logger;
 	_erc1155Logger;
 	_erc1155BatchLogger;
-	_block_subscriber;
+	_contractLogger;
 
-	constructor() {
+	constructor({ indexingCycle = 0 }) {
+		this._initiate(indexingCycle);
+	}
+
+	async _initiate(indexingCycle) {
+		if (!indexingCycle || parseInt(indexingCycle) === 0) {
+			indexingCycle = await this._getCurrentCycle();
+		}
+		this._indexingCycle = indexingCycle;
 		this._erc721Logger = new ERC721Logger(web3);
 		this._erc1155Logger = new ERC1155Logger(web3);
 		this._erc1155BatchLogger = new ERC1155BatchLogger(web3);
-		this._listenForBLockHeader();
+		// this._contractLogger = new captureContracts({ chain });
+		this._listenForCycle();
 	}
 
-	async _initiate() {
+	async _listenForCycle() {
 		try {
-			const erc721Logger = this._erc721Logger;
-			const erc1155Logger = this._erc1155Logger;
-			const erc1155BatchLogger = this._erc1155BatchLogger;
-			web3.eth
-				.subscribe(
-					"logs",
-					{
-						topics: [
-							[
-								ERC721_TRANSFER_EVENT_HASH,
-								ERC1155_TRANSFER_EVENT_HASH,
-								ERC1155_BATCH_TRANSFER_EVENT_HASH,
-							],
-						],
-					},
-					function (error, _) {
-						if (error) console.log("error:", error);
-					}
-				)
-				.on("connected", function (subId) {
-					console.log("subid:", subId);
-				})
-				.on("data", async function (data) {
-					// Send logs to indexer's
-					if (data.topics.length === 4) {
-						if (data.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
-							erc721Logger._captureLogs(data);
-							console.log(`ERC721 - ${data.transactionHash}`);
-						} else if (data.topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
-							erc1155Logger._captureLogs(data);
-							console.log(`ERC1155 - ${data.transactionHash}`);
-						} else if (data.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH) {
-							erc1155BatchLogger._captureLogs(data);
-							console.log(`ERC1155BATCH - ${data.transactionHash}`);
+			while (true) {
+				this._currentCycle = await this._getCurrentCycle();
+				console.log(
+					`INDEXING CYCLE: ${this._indexingCycle}; NETWORK CYCLE: ${this._currentCycle}`
+				);
+
+				let totalTransactions = 0;
+				let baseUrlCycleAddress = `${chain.blockExplorerUrls[0]}/api/transaction?startCycle=${this._indexingCycle}&endCycle=${this._indexingCycle}`;
+				let req = await axios.get(baseUrlCycleAddress);
+				const data = req.data;
+				totalTransactions = data.totalTransactions;
+
+				let pageIndex = 1;
+
+				for (var i = 0; i < totalTransactions; i += 10) {
+					let filterUrl = baseUrlCycleAddress + "&page=" + pageIndex;
+					let req = await axios.get(filterUrl);
+					const data = req.data;
+					// Contract Indexer
+					this._contractLogger.addTransactions(data.transactions);
+
+					for (var k = 0; k < data.transactions.length; k++) {
+						let tx = data.transactions[k];
+						const tx_logs = tx.wrappedEVMAccount.readableReceipt.logs;
+						if (tx_logs && tx_logs.length > 0) {
+							for (var j = 0; j < tx_logs.length; j++) {
+								let log = tx_logs[j];
+								if (log.topics.length === 4) {
+									log.timestamp = tx.timestamp;
+									log.blockNumber = tx.cycle;
+									log.transactionIndex = log.transactionHash;
+									log.logIndex = j;
+									if (log.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
+										this._erc721Logger._captureLogs(log);
+										console.log(`ERC721 - ${log.transactionHash}`);
+									} else if (log.topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
+										this._erc1155Logger._captureLogs(log);
+										console.log(`ERC1155 - ${log.transactionHash}`);
+									} else if (
+										log.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH
+									) {
+										this._erc1155BatchLogger._captureLogs(log);
+										console.log(`ERC1155BATCH - ${log.transactionHash}`);
+									}
+								}
+							}
 						}
 					}
-				})
-				.on("error", console.error);
-		} catch (e) {
-			console.log({ "Listener Message": e.message });
-		}
-	}
+					pageIndex++;
+				}
 
-	async _listenForBLockHeader() {
-		global_currentBlockNumber = await web3.eth.getBlockNumber();
-		if (global_indexingBlockNumber > global_currentBlockNumber) {
-			this._initiate();
-			captureContracts.initiate();
-			return;
-		}
-
-		if (!global_listeningToBlock) {
-			global_listeningToBlock = true;
-			this.indexBlocks();
-		}
-
-		this._block_subscriber = web3.eth
-			.subscribe("newBlockHeaders", function (error, _) {
-				if (error) console.log("error:", error);
-			})
-			.on("connected", function (subId) {
-				console.log("BlockHeader subid:", subId);
-			})
-			.on("data", async function (blockHeader) {
-				global_currentBlockNumber = blockHeader.number;
-			});
-	}
-
-	async indexBlocks() {
-		try {
-			// Get Past Logs (ASYNC)
-			const logs = await web3.eth.getPastLogs({
-				topics: [
-					[
-						ERC721_TRANSFER_EVENT_HASH,
-						ERC1155_TRANSFER_EVENT_HASH,
-						ERC1155_BATCH_TRANSFER_EVENT_HASH,
-					],
-				],
-				fromBlock: global_indexingBlockNumber,
-				toBlock: global_indexingBlockNumber,
-			});
-			captureContracts.extractContractTransaction(global_indexingBlockNumber);
-
-			console.log(
-				`Indexing Block: ${global_indexingBlockNumber}; Current Block: ${global_currentBlockNumber}; Total Transfers: ${logs.length}`
-			);
-
-			for (var i = 0; i < logs.length; i++) {
-				// Send logs to indexer's
-				if (logs[i].topics.length === 4) {
-					if (logs[i].topics[0] === ERC721_TRANSFER_EVENT_HASH) {
-						this._erc721Logger._captureLogs(logs[i]);
-						console.log(`ERC721 - ${logs[i].transactionHash}`);
-					} else if (logs[i].topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
-						this._erc1155Logger._captureLogs(logs[i]);
-						console.log(`ERC1155 - ${logs[i].transactionHash}`);
-					} else if (logs[i].topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH) {
-						this._erc1155BatchLogger._captureLogs(logs[i]);
-						console.log(`ERC1155BATCH - ${logs[i].transactionHash}`);
-					}
+				this._indexingCycle++;
+				if (this._indexingCycle > this._currentCycle) {
+					await timeout(60 * 1000);
 				}
 			}
-			global_indexingBlockNumber++;
-
-			if (global_indexingBlockNumber > global_currentBlockNumber) {
-				this._block_subscriber.unsubscribe();
-				global_listeningToBlock = false;
-				this._initiate();
-				captureContracts.initiate();
-			} else {
-				this.indexBlocks();
-			}
 		} catch (error) {
-			global_indexingBlockNumber++;
-			this.indexBlocks();
-			console.log({ "Block Listener": error.message });
+			console.log(error)
+			console.log({ LISTENER_LISTEN: error.message });
+			if (this._indexingCycle > this._currentCycle) {
+				await timeout(60 * 1000);
+			}
+			this._listenForCycle();
 		}
+	}
+
+	async _getCurrentCycle() {
+		let cycle = await web3.eth.getBlockNumber();
+		const currentCycle = Math.floor(cycle / 10);
+		this._currentCycle = currentCycle;
+		return this._currentCycle;
 	}
 }
 
