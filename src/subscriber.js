@@ -4,6 +4,10 @@ const {
 	ERC1155_TRANSFER_EVENT_HASH,
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
 	web3,
+	SALE_EVENT_HASH,
+	OFFER_EVENT_HASH,
+	AUCTION_EVENT_HASH,
+	BID_EVENT_HASH,
 } = require("./constants");
 
 const { CHAIN } = require("./constants");
@@ -13,6 +17,7 @@ const { erc721CaptureLogs } = require("./ERC721");
 const { erc1155CaptureLogs } = require("./ERC1155");
 const { erc1155BatchCaptureLogs } = require("./ERC1155Batch");
 const { captureContracts } = require("./events/contract");
+const { marketEventListener } = require("./events");
 
 function timeout(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -67,7 +72,6 @@ class Subscribe {
 								let log = tx_logs[j];
 								if (log.topics.length === 4) {
 									log.timestamp = tx.timestamp;
-									log.blockNumber = tx.cycle;
 									log.transactionIndex = log.transactionHash;
 									log.logIndex = j;
 									if (log.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
@@ -78,6 +82,13 @@ class Subscribe {
 										log.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH
 									) {
 										erc1155BatchCaptureLogs(log);
+									} else if (
+										log.topics[0] === SALE_EVENT_HASH ||
+										log.topics[0] === OFFER_EVENT_HASH ||
+										log.topics[0] === AUCTION_EVENT_HASH ||
+										log.topics[0] === BID_EVENT_HASH
+									) {
+										marketEventListener(log);
 									}
 								}
 							}

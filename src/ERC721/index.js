@@ -13,7 +13,7 @@ const erc721CaptureLogs = async function (log) {
 
 		// Save log
 		// log.timestamp = block.timestamp;
-		log.logId = `${log.blockNumber}-${log.transactionIndex}-${log.logIndex}`;
+		log.logId = `${log.transactionIndex}-${log.logIndex}`;
 		log = await new Log(log).save();
 
 		// Save NFT

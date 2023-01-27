@@ -1,7 +1,5 @@
-const Web3 = require("web3");
-const { CHAIN } = require("../constants");
+const { CHAIN, web3 } = require("../constants");
 const { Auction } = require("../models/auction");
-const web3 = new Web3();
 
 const auctionStatus = ["create", "update", "cancel", "settle"];
 
@@ -19,6 +17,7 @@ const handleAuctionEvent = async function (log, nft) {
 			],
 			log.data
 		);
+		log.address = web3.utils.toChecksumAddress(log.address);
 		const auctionStatusCode = web3.utils.hexToNumberString(log.topics[3]);
 		if (auctionStatusCode === "0") {
 			await new Auction({

@@ -4,10 +4,16 @@ const {
 	AUCTION_EVENT_HASH,
 	BID_EVENT_HASH,
 	web3,
+	ERC721_TRANSFER_EVENT_HASH,
+	ERC1155_TRANSFER_EVENT_HASH,
+	ERC1155_BATCH_TRANSFER_EVENT_HASH,
 } = require("../constants");
 const { NFT } = require("../models/nft");
 const { executeCommand } = require("../pool");
 const { marketEventListener } = require("../events");
+const { erc721CaptureLogs } = require("../ERC721");
+const { erc1155CaptureLogs } = require("../ERC1155");
+const { erc1155BatchCaptureLogs } = require("../ERC1155Batch");
 
 const updateMetadata = async function (req, res) {
 	try {
@@ -30,16 +36,22 @@ const createEvent = async function (req, res) {
 		const tx = await web3.eth.getTransactionReceipt(txid);
 
 		for (var i = 0; i < tx.logs.length; i++) {
-			if (
+			tx.logs[i].timestamp = Date.now();
+			tx.logs[i].transactionIndex = tx.logs[i].transactionHash;
+			tx.logs[i].logIndex = i;
+
+			if (tx.logs[i].topics[0] === ERC721_TRANSFER_EVENT_HASH) {
+				erc721CaptureLogs(tx.logs[i]);
+			} else if (tx.logs[i].topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
+				erc1155CaptureLogs(tx.logs[i]);
+			} else if (tx.logs[i].topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH) {
+				erc1155BatchCaptureLogs(tx.logs[i]);
+			} else if (
 				tx.logs[i].topics[0] === SALE_EVENT_HASH ||
 				tx.logs[i].topics[0] === OFFER_EVENT_HASH ||
 				tx.logs[i].topics[0] === AUCTION_EVENT_HASH ||
 				tx.logs[i].topics[0] === BID_EVENT_HASH
 			) {
-				tx.logs[i].timestamp = tx.timestamp;
-				tx.logs[i].transactionIndex = tx.logs[i].transactionHash;
-				tx.logs[i].logIndex = i;
-				tx.logs[i].timestamp = Date.now();
 				marketEventListener(tx.logs[i]);
 			}
 		}

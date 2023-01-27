@@ -1,8 +1,6 @@
-const Web3 = require("web3");
-const { CHAIN } = require("../constants");
+const { CHAIN, web3 } = require("../constants");
 const { Auction } = require("../models/auction");
 const { Bid } = require("../models/bid");
-const web3 = new Web3();
 
 const handleBidEvent = async function (log, nft) {
 	try {
@@ -23,7 +21,7 @@ const handleBidEvent = async function (log, nft) {
 			contract_address: nft.contract_address,
 			amount: data[1],
 			bidder: web3.eth.abi.decodeParameter("address", log.topics[3]),
-			market_address: log.address,
+			market_address: web3.utils.toChecksumAddress(log.address),
 			chain_id: CHAIN.chainId,
 		}).save();
 		auction.bids = auction.bids.concat(bid._id);
