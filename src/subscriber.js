@@ -1,19 +1,17 @@
-const Web3 = require("web3");
 const { default: axios } = require("axios");
 const {
 	ERC721_TRANSFER_EVENT_HASH,
 	ERC1155_TRANSFER_EVENT_HASH,
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
+	web3,
 } = require("./constants");
 
 const { CHAIN } = require("./constants");
-const chain = CHAIN;
-const web3 = new Web3(chain.websocketRpcUrl);
 
 // Listeners
-const { ERC721Logger } = require("./ERC721");
-const { ERC1155Logger } = require("./ERC1155");
-const { ERC1155BatchLogger } = require("./ERC1155Batch");
+const { erc721CaptureLogs } = require("./ERC721");
+const { erc1155CaptureLogs } = require("./ERC1155");
+const { erc1155BatchCaptureLogs } = require("./ERC1155Batch");
 const { captureContracts } = require("./events/contract");
 
 function timeout(ms) {
@@ -23,9 +21,6 @@ function timeout(ms) {
 class Subscribe {
 	_currentCycle = 0;
 	_indexingCycle;
-	_erc721Logger;
-	_erc1155Logger;
-	_erc1155BatchLogger;
 	_contractLogger;
 
 	constructor({ indexingCycle = 0 }) {
@@ -37,9 +32,6 @@ class Subscribe {
 			indexingCycle = await this._getCurrentCycle();
 		}
 		this._indexingCycle = indexingCycle;
-		this._erc721Logger = new ERC721Logger(web3);
-		this._erc1155Logger = new ERC1155Logger(web3);
-		this._erc1155BatchLogger = new ERC1155BatchLogger(web3);
 		this._contractLogger = captureContracts;
 		this._listenForCycle();
 	}
@@ -53,7 +45,7 @@ class Subscribe {
 				);
 
 				let totalTransactions = 0;
-				let baseUrlCycleAddress = `${chain.blockExplorerUrls[0]}/api/transaction?startCycle=${this._indexingCycle}&endCycle=${this._indexingCycle}`;
+				let baseUrlCycleAddress = `${CHAIN.blockExplorerUrls[0]}/api/transaction?startCycle=${this._indexingCycle}&endCycle=${this._indexingCycle}`;
 				let req = await axios.get(baseUrlCycleAddress);
 				const data = req.data;
 				totalTransactions = data.totalTransactions;
@@ -79,13 +71,13 @@ class Subscribe {
 									log.transactionIndex = log.transactionHash;
 									log.logIndex = j;
 									if (log.topics[0] === ERC721_TRANSFER_EVENT_HASH) {
-										this._erc721Logger._captureLogs(log);
+										erc721CaptureLogs(log);
 									} else if (log.topics[0] === ERC1155_TRANSFER_EVENT_HASH) {
-										this._erc1155Logger._captureLogs(log);
+										erc1155CaptureLogs(log);
 									} else if (
 										log.topics[0] === ERC1155_BATCH_TRANSFER_EVENT_HASH
 									) {
-										this._erc1155BatchLogger._captureLogs(log);
+										erc1155BatchCaptureLogs(log);
 									}
 								}
 							}
@@ -100,7 +92,7 @@ class Subscribe {
 				}
 			}
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 			console.log({ LISTENER_LISTEN: error.message });
 			if (this._indexingCycle > this._currentCycle) {
 				await timeout(60 * 1000);
