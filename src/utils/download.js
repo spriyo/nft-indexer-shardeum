@@ -22,7 +22,10 @@ const download = async (url, path) => {
 				try {
 					// chunk received from the server
 					const contentType = resp.headers["content-type"].split("/")[1];
-					// console.log("content-length:", res.headers["content-length"]);
+					if (parseInt(resp.headers["content-length"]) >= 5000000) {
+						resolve("");
+						console.log({ DOWNLOAD: "File larger than 5MB." });
+					}
 
 					const upload = await s3
 						.upload({

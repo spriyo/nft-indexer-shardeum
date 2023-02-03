@@ -47,6 +47,13 @@ const CHAINS_CONFIG = {
 		websocketRpcUrl: "https://liberty20.shardeum.org",
 		blockExplorerUrls: ["https://explorer-liberty20.shardeum.org"],
 	},
+	SHARDEUM_BETA: {
+		chainId: 8082,
+		chainName: "Shardeum Betanet",
+		nativeCurrency: { name: "Shard", symbol: "SHM", decimals: 18 },
+		websocketRpcUrl: "https://sphinx.shardeum.org",
+		blockExplorerUrls: ["https://explorer-sphinx.shardeum.org/"],
+	},
 };
 
 const CHAIN = CHAINS_CONFIG[process.env.CHAIN];
