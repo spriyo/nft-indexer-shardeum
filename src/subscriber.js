@@ -98,14 +98,14 @@ class Subscribe {
 				}
 
 				this._indexingCycle++;
-				if (this._indexingCycle > this._currentCycle) {
+				if (this._indexingCycle >= this._currentCycle) {
 					await timeout(60 * 1000);
 				}
 			}
 		} catch (error) {
 			console.log(error);
 			console.log({ LISTENER_LISTEN: error.message });
-			if (this._indexingCycle > this._currentCycle) {
+			if (this._indexingCycle >= this._currentCycle) {
 				await timeout(60 * 1000);
 			}
 			this._listenForCycle();

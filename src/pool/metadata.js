@@ -1,13 +1,9 @@
-const Web3 = require("web3");
-const { CHAIN } = require("../constants");
 const { download } = require("../utils/download");
 const { fetchMetadata } = require("../utils/fetchMetadata");
 const { getIpfsUrl } = require("../utils/getIpfsUrl");
 const ERC721_JSONInterface = require("../contracts/ERC721.json");
 const ERC1155_JSONInterface = require("../contracts/ERC1155.json");
-
-const chain = CHAIN;
-const web3 = new Web3(chain.websocketRpcUrl);
+const { web3 } = require("../constants");
 
 process.on("message", async (nft) => {
 	const data = await mine(nft);

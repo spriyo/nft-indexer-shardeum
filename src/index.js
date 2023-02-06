@@ -37,7 +37,7 @@ fs.readdirSync(models)
 
 const { Subscribe } = require("./subscriber.js");
 const { router } = require("./api");
-new Subscribe({ indexingCycle: process.env.CYCLE || 0 });
+// new Subscribe({ indexingCycle: process.env.CYCLE || 0 });
 
 // CORS
 app.use(function (req, res, next) {
