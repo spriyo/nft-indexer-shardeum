@@ -4,6 +4,7 @@ const {
 	OFFER_EVENT_HASH,
 	AUCTION_EVENT_HASH,
 	BID_EVENT_HASH,
+	SALE_EVENT_HASH,
 } = require("../constants");
 const { Events } = require("../models/event");
 const { Log } = require("../models/logs");
@@ -11,6 +12,7 @@ const { NFT } = require("../models/nft");
 const { handleOfferEvent } = require("./offer");
 const { handleAuctionEvent } = require("./auction");
 const { handleBidEvent } = require("./bid");
+const { handleSaleEvent } = require("./sale");
 const chain = CHAIN;
 const web3 = new Web3(chain.websocketRpcUrl);
 
@@ -56,6 +58,8 @@ const marketEventListener = async function (log) {
 			handleAuctionEvent(log, nft);
 		} else if (log.topics[0] === BID_EVENT_HASH) {
 			handleBidEvent(log, nft);
+		} else if (log.topics[0] === SALE_EVENT_HASH) {
+			handleSaleEvent(log, nft);
 		}
 	} catch (error) {
 		console.log({ "Market Event Listener": error.message });
