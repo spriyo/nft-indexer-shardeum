@@ -47,6 +47,8 @@ const OwnerSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
+OwnerSchema.index({ nft_id: 1 }, { background: true });
+
 // Pre and Post Check
 // Checksum conversion
 OwnerSchema.pre("save", function (next) {

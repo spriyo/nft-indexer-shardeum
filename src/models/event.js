@@ -88,6 +88,8 @@ const EventsSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
+EventsSchema.index({ nft_id: 1 }, { background: true });
+
 const Events = new mongoose.model("Events", EventsSchema);
 
 module.exports = { Events };
