@@ -61,7 +61,7 @@ const OfferSchema = new mongoose.Schema({
 	status: {
 		type: String,
 		enum: ["create", "accept", "cancel"],
-		default: "created",
+		default: "create",
 		required: true,
 	},
 	sold: {
