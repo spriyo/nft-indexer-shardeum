@@ -1,7 +1,7 @@
 const { CHAIN, web3 } = require("../constants");
 const { Offer } = require("../models/offer");
 
-const offerStatus = ["created", "accepted", "canceled"];
+const offerStatus = ["create", "accept", "cancel"];
 
 const handleOfferEvent = async function (log, nft) {
 	try {
@@ -30,7 +30,7 @@ const handleOfferEvent = async function (log, nft) {
 				nft_id: nft._id,
 				market_address: log.address,
 			});
-			offer.offer_status = offerStatus[parseInt(offerStatusCode)];
+			offer.status = offerStatus[parseInt(offerStatusCode)];
 			offer.sold = data[4];
 			await offer.save();
 		}

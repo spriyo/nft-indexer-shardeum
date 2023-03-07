@@ -55,6 +55,8 @@ ContractSchema.pre("save", function (next) {
 	next();
 });
 
+ContractSchema.index({ address: 1 }, { background: true});
+
 const Contract = new mongoose.model("Contract", ContractSchema);
 
 module.exports = { Contract };

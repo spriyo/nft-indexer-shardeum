@@ -57,6 +57,8 @@ NftSchema.pre("save", function (next) {
 	next();
 });
 
+NftSchema.index({ contract_address: 1 }, { background: true });
+
 const NFT = new mongoose.model("Nft", NftSchema);
 
 module.exports = { NFT };
