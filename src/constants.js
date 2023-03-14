@@ -9,9 +9,6 @@ const ERC1155_TRANSFER_EVENT_HASH =
 const ERC1155_BATCH_TRANSFER_EVENT_HASH =
 	"0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb";
 
-// web3.utils.keccak256("EventSale(uint256,uint256,uint256,address,address,bool,uint8)");
-const SALE_EVENT_HASH =
-	"0x0cd43fd9c12c0b040dc330b451adcefd47851dfa029dec57f23f570054ef4688";
 // web3.utils.keccak256("EventOffer(uint256,uint256,uint256,uint256,address,address,bool,uint8)");
 const OFFER_EVENT_HASH =
 	"0x3d44ddf83a852335fb93dea137ad2410905452f00c66ea62151f153d0a11ae5e";
@@ -25,6 +22,8 @@ const BID_EVENT_HASH =
 // New Events
 const LISTING_EVENT_HASH =
 	"0x71c9f9d59fd1fc7950c821fbec2777447d44d98666539522db7b18141b54aeab";
+const SALE_EVENT_HASH =
+	"0xc5cb046310b10ced04297b53844888d9fd0faf33c2b02e18fb88c614561afb60";
 
 const IPFS_REGEX = /^ipfs:\/\//gm;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";

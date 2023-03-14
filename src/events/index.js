@@ -28,13 +28,12 @@ const marketEventListener = async function (log) {
 		log.logId = `${log.transactionIndex}-${log.logIndex}`;
 		log = await new Log(log).save();
 
-		let nft = await NFT.findOne({
-			contract_address: web3.eth.abi.decodeParameter("address", log.topics[2]),
-			token_id: web3.utils.hexToNumberString(log.topics[1]),
-			chain_id: CHAIN.chainId,
-		});
+		let nft;
 		// New Event indexes
-		if (log.topics[0] === LISTING_EVENT_HASH) {
+		if (
+			log.topics[0] === LISTING_EVENT_HASH ||
+			log.topics[0] === SALE_EVENT_HASH
+		) {
 			nft = await NFT.findOne({
 				chain_id: CHAIN.chainId,
 				token_id: web3.utils.hexToNumberString(log.topics[2]),
@@ -42,6 +41,15 @@ const marketEventListener = async function (log) {
 					"address",
 					log.topics[3]
 				),
+			});
+		} else {
+			nft = await NFT.findOne({
+				contract_address: web3.eth.abi.decodeParameter(
+					"address",
+					log.topics[2]
+				),
+				token_id: web3.utils.hexToNumberString(log.topics[1]),
+				chain_id: CHAIN.chainId,
 			});
 		}
 
@@ -71,10 +79,10 @@ const marketEventListener = async function (log) {
 			handleAuctionEvent(log, nft);
 		} else if (log.topics[0] === BID_EVENT_HASH) {
 			handleBidEvent(log, nft);
-		} else if (log.topics[0] === SALE_EVENT_HASH) {
-			handleSaleEvent(log, nft);
 		} else if (log.topics[0] === LISTING_EVENT_HASH) {
 			handleListingEvent(log, nft);
+		} else if (log.topics[0] === SALE_EVENT_HASH) {
+			handleSaleEvent(log, nft);
 		}
 	} catch (error) {
 		console.log({ "Market Event Listener": error.message });

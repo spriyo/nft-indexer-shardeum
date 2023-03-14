@@ -3,7 +3,7 @@ const validator = require("validator");
 
 const SaleSchema = new mongoose.Schema(
 	{
-		sale_id: {
+		listing_id: {
 			type: Number,
 			required: true,
 		},
@@ -26,11 +26,17 @@ const SaleSchema = new mongoose.Schema(
 				}
 			},
 		},
-		amount: {
+		seller: {
 			type: String,
 			required: true,
+			trim: true,
+			validate(value) {
+				if (!validator.isEthereumAddress(value.toString())) {
+					throw new Error("Invalid nft owner address");
+				}
+			},
 		},
-		seller: {
+		buyer: {
 			type: String,
 			required: true,
 			trim: true,
@@ -50,23 +56,43 @@ const SaleSchema = new mongoose.Schema(
 				}
 			},
 		},
-		sold: {
-			type: Boolean,
-			required: true,
-			default: false,
-		},
 		boughtAt: {
 			type: Date,
-		},
-		status: {
-			type: String,
-			enum: ["create", "update", "cancel", "accept"],
-			default: "create",
 		},
 		chain_id: {
 			type: Number,
 			required: true,
 			trim: true,
+		},
+		// New fields for V2
+		quantity: {
+			type: String,
+			required: true,
+			default: "1",
+		},
+		currency: {
+			type: String,
+			required: true,
+			trim: true,
+			validate(value) {
+				if (!validator.isEthereumAddress(value.toString())) {
+					throw new Error("Invalid market contract address");
+				}
+			},
+		},
+		pricePerToken: {
+			type: String,
+			required: true,
+		},
+		totalAmount: {
+			type: String,
+			required: true,
+		},
+		tokenType: {
+			type: String,
+			required: true,
+			enum: ["ERC721", "ERC1155"],
+			default: "ERC721",
 		},
 	},
 	{ timestamps: true }
