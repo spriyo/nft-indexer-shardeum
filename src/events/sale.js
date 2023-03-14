@@ -11,7 +11,6 @@ const handleSaleEvent = async function (log, nft) {
 		);
 		log.address = web3.utils.toChecksumAddress(log.address);
 		const saleStatusCode = web3.utils.hexToNumberString(log.topics[3]);
-		console.log(data, saleStatusCode);
 		if (saleStatusCode === "0") {
 			await new Sale({
 				sale_id: data[0],

@@ -22,6 +22,10 @@ const AUCTION_EVENT_HASH =
 const BID_EVENT_HASH =
 	"0x7d827aee9861babd4633b901c0e9619a8bf942083be2e2297aaf3dd5e8f7952b";
 
+// New Events
+const LISTING_EVENT_HASH =
+	"0x71c9f9d59fd1fc7950c821fbec2777447d44d98666539522db7b18141b54aeab";
+
 const IPFS_REGEX = /^ipfs:\/\//gm;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -41,7 +45,7 @@ const CHAINS_CONFIG = {
 		websocketRpcUrl: "ws://127.0.0.1:8545",
 	},
 	SHARDEUM20: {
-		chainId: "8081",
+		chainId: 8081,
 		chainName: "Shardeum 2.0",
 		nativeCurrency: { name: "Shard", symbol: "SHM", decimals: 18 },
 		websocketRpcUrl: "https://liberty20.shardeum.org",
@@ -60,6 +64,7 @@ const CHAIN = CHAINS_CONFIG[process.env.CHAIN];
 const web3 = new Web3(CHAIN.websocketRpcUrl);
 
 module.exports = {
+	LISTING_EVENT_HASH,
 	SALE_EVENT_HASH,
 	OFFER_EVENT_HASH,
 	AUCTION_EVENT_HASH,

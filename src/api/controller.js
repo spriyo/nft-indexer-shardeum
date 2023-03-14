@@ -7,6 +7,7 @@ const {
 	ERC721_TRANSFER_EVENT_HASH,
 	ERC1155_TRANSFER_EVENT_HASH,
 	ERC1155_BATCH_TRANSFER_EVENT_HASH,
+	LISTING_EVENT_HASH,
 } = require("../constants");
 const { NFT } = require("../models/nft");
 const { executeCommand } = require("../pool");
@@ -50,7 +51,8 @@ const createEvent = async function (req, res) {
 				tx.logs[i].topics[0] === SALE_EVENT_HASH ||
 				tx.logs[i].topics[0] === OFFER_EVENT_HASH ||
 				tx.logs[i].topics[0] === AUCTION_EVENT_HASH ||
-				tx.logs[i].topics[0] === BID_EVENT_HASH
+				tx.logs[i].topics[0] === BID_EVENT_HASH ||
+				tx.logs[i].topics[0] === LISTING_EVENT_HASH
 			) {
 				marketEventListener(tx.logs[i]);
 			}

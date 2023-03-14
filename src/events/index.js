@@ -5,6 +5,7 @@ const {
 	AUCTION_EVENT_HASH,
 	BID_EVENT_HASH,
 	SALE_EVENT_HASH,
+	LISTING_EVENT_HASH,
 } = require("../constants");
 const { Events } = require("../models/event");
 const { Log } = require("../models/logs");
@@ -13,6 +14,7 @@ const { handleOfferEvent } = require("./offer");
 const { handleAuctionEvent } = require("./auction");
 const { handleBidEvent } = require("./bid");
 const { handleSaleEvent } = require("./sale");
+const { handleListingEvent } = require("./listing");
 const chain = CHAIN;
 const web3 = new Web3(chain.websocketRpcUrl);
 
@@ -31,6 +33,17 @@ const marketEventListener = async function (log) {
 			token_id: web3.utils.hexToNumberString(log.topics[1]),
 			chain_id: CHAIN.chainId,
 		});
+		// New Event indexes
+		if (log.topics[0] === LISTING_EVENT_HASH) {
+			nft = await NFT.findOne({
+				chain_id: CHAIN.chainId,
+				token_id: web3.utils.hexToNumberString(log.topics[2]),
+				contract_address: web3.eth.abi.decodeParameter(
+					"address",
+					log.topics[3]
+				),
+			});
+		}
 
 		// Get Transaction Details (ASYNC)
 		const tx = await web3.eth.getTransaction(log.transactionHash);
@@ -60,6 +73,8 @@ const marketEventListener = async function (log) {
 			handleBidEvent(log, nft);
 		} else if (log.topics[0] === SALE_EVENT_HASH) {
 			handleSaleEvent(log, nft);
+		} else if (log.topics[0] === LISTING_EVENT_HASH) {
+			handleListingEvent(log, nft);
 		}
 	} catch (error) {
 		console.log({ "Market Event Listener": error.message });
