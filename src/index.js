@@ -8,17 +8,19 @@ const http = require("http").createServer(app);
 // If .env file is not found in location,
 // no errors or exceptions will be thrown
 console.log(process.env.NODE_ENV);
-if (process.env.NODE_ENV === "staging") {
+if (
+	process.env.NODE_ENV === "development-shinx" ||
+	process.env.NODE_ENV === "production-sphinx"
+) {
 	require("dotenv").config({
-		path: path.join(__dirname, "../envconfig/.staging.env"),
+		path: path.join(__dirname, "../envconfig/.sphinx.env"),
 	});
-} else if (process.env.NODE_ENV === "production") {
+} else if (
+	process.env.NODE_ENV === "development-liberty" ||
+	process.env.NODE_ENV === "production-liberty"
+) {
 	require("dotenv").config({
-		path: path.join(__dirname, "../envconfig/.production.env"),
-	});
-} else if (process.env.NODE_ENV === "development-remote") {
-	require("dotenv").config({
-		path: path.join(__dirname, "../envconfig/.dev.env"),
+		path: path.join(__dirname, "../envconfig/.liberty.env"),
 	});
 } else {
 	require("dotenv").config({ path: path.join(__dirname, "../envconfig/.env") });
@@ -37,7 +39,7 @@ fs.readdirSync(models)
 
 const { Subscribe } = require("./subscriber.js");
 const { router } = require("./api");
-// new Subscribe({ indexingCycle: process.env.CYCLE || 0 });
+new Subscribe({ indexingCycle: process.env.CYCLE || 0 });
 
 // CORS
 app.use(function (req, res, next) {

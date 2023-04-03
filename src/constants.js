@@ -30,7 +30,7 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const CHAINS_CONFIG = {
 	MUMBAI: {
-		chainId: "80001",
+		chainId: 80001,
 		chainName: "Mumbai",
 		nativeCurrency: { name: "Matic", symbol: "MATIC", decimals: 18 },
 		websocketRpcUrl:

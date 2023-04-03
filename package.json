@@ -16,10 +16,11 @@
 		"web3": "^1.7.4"
 	},
 	"scripts": {
-		"dev": "set NODE_ENV=development&& nodemon --trace-warnings src/index.js",
-		"dev-remote": "set NODE_ENV=development-remote&& nodemon src/index.js",
-		"staging": "set NODE_ENV=staging&& nodemon src/index.js",
-		"start": "export NODE_ENV=production && node src/index.js"
+		"dev": "set NODE_ENV=development&&nodemon --trace-warnings src/index.js",
+		"dev-sphinx": "set NODE_ENV=development-shinx&&nodemon --trace-warnings src/index.js",
+		"dev-liberty": "set NODE_ENV=development-liberty&&nodemon --trace-warnings src/index.js",
+		"start-sphinx": "export NODE_ENV=production-sphinx && node src/index.js",
+		"start-liberty": "export NODE_ENV=production-liberty && node src/index.js"
 	},
 	"keywords": [],
 	"author": "",
